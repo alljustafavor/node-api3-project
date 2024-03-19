@@ -8,21 +8,34 @@ function logger(req, res, next) {
 
 async function validateUserId(req, res, next) {
   let user = await User.getById(req.params.id);
-  if (!user) return res.status(404).json({ message: 'user not found'});
+  if (!user) {
+    res.status(404).json({ message: 'user not found'});
+  }
+  req.user = user;
+  next();
 }
 
 function validateUser(req, res, next) {
-  if (typeof req.body.name !== 'string' || req.body.name.trim() === '') {
-    return res.status(400).json({ message: 'missing required name field'});
+  const { name } = req.body;
+  if (typeof name !== 'string' || name.trim() === '') {
+    res.status(400).json({ message: 'missing required name field'});
   }
+  req.name = name.trim();
   next();
 }
 
 function validatePost(req, res, next) {
-  if (!req.body.text) return res.status(400).json({ message: 'missing required text field'})
-  req.post = req.body.text;
-  next();
-}
+  const { text } = req.body;
+  if (!text || !text.trim()) {
+    res.status(400).json({
+    message: 'missing required text field'
+    })
+
+  } else {
+    req.text = text.trim()
+    next()
+  }
+ }
 
 module.exports = {
   logger,
